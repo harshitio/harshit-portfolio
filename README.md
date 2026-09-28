@@ -14,7 +14,9 @@ Vite + React 18 + TypeScript (strict) + Tailwind CSS 3.4 + framer-motion 12.
 
 ## Deploy
 
-Deployed on Vercel (`harshit.is-a.dev`). SPA rewrite handled by `vercel.json`.
+Live on GitHub Pages: https://harshitio.github.io
+
+`npm run build` → push `dist/` + `404.html` to the `harshitio/harshitio.github.io` repo (SPA fallback via `404.html`). Vercel is retired.
 
 ## Contact
 

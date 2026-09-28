@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://harshitio.is-a.dev/sitemap.xml
+Sitemap: https://harshitio.github.io/sitemap.xml
