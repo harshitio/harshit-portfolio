@@ -49,7 +49,7 @@
   top: 50%;
   left: 50%;
   border-radius: 50%;
-  border: 2px solid #0a0a0a;
+  border: 2px solid rgba(215, 226, 234, 0.28);
   transform: translate(-50%, -50%);
   animation: orbit-spin var(--dur) linear infinite;
   z-index: 2;
