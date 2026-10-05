@@ -51,6 +51,75 @@ footer[id] {
   }
 }
 
+/* ---- Magic spell rings: slow opposite rotations ---- */
+.spell-ring-a {
+  border: 1px dashed rgba(255, 170, 90, 0.4);
+  box-shadow:
+    0 0 24px rgba(255, 150, 60, 0.22),
+    inset 0 0 24px rgba(255, 150, 60, 0.12);
+  animation: spell-spin 28s linear infinite;
+}
+
+.spell-ring-b {
+  border: 1px dotted rgba(215, 226, 234, 0.35);
+  box-shadow:
+    0 0 20px rgba(215, 226, 234, 0.14),
+    inset 0 0 20px rgba(215, 226, 234, 0.08);
+  animation: spell-spin-rev 46s linear infinite;
+}
+
+@keyframes spell-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spell-spin-rev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* ---- Black-hole shine: breathing glow ---- */
+.spell-glow {
+  background: radial-gradient(
+    circle,
+    rgba(255, 190, 110, 0.55) 0%,
+    rgba(255, 140, 60, 0.22) 40%,
+    transparent 70%
+  );
+  animation: hole-glow-pulse 5.5s ease-in-out infinite;
+}
+
+@keyframes hole-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+/* ---- Floating sparks ---- */
+.spark {
+  animation: spark-twinkle 3s ease-in-out infinite;
+}
+
+@keyframes spark-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
