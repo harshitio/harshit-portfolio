@@ -1,4 +1,5 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useEffect } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import FadeIn from '../components/FadeIn';
 import SocialOrbit from '../components/SocialOrbit';
 import { GITHUB_URL, X_URL } from '../lib/constants';
@@ -9,17 +10,38 @@ export default function HeroSection() {
   const orbitScale = useTransform(scrollY, [0, 450], [1, 0.82]);
   const orbitY = useTransform(scrollY, [0, 450], [0, -30]);
 
+  // Interactive parallax: background drifts against the cursor, smoothed.
+  const mX = useMotionValue(0);
+  const mY = useMotionValue(0);
+  const sX = useSpring(mX, { stiffness: 50, damping: 20 });
+  const sY = useSpring(mY, { stiffness: 50, damping: 20 });
+  const bgX = useTransform(sX, [-0.5, 0.5], [14, -14]);
+  const bgY = useTransform(sY, [-0.5, 0.5], [10, -10]);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mX.set(e.clientX / window.innerWidth - 0.5);
+      mY.set(e.clientY / window.innerHeight - 0.5);
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
+  }, [mX, mY]);
+
   return (
     <section className="relative flex h-screen flex-col overflow-x-clip bg-black text-white">
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          backgroundImage: 'url(/hero/blackhole.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <motion.div className="absolute -inset-10" style={{ x: bgX, y: bgY }}>
+          <div
+            className="hero-bg-drift h-full w-full"
+            style={{
+              backgroundImage: 'url(/hero/blackhole.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        </motion.div>
+      </div>
 
       <div className="pointer-events-none hidden lg:block absolute right-[2%] xl:right-[4%] top-1/2 -translate-y-1/2 z-30">
         <motion.div

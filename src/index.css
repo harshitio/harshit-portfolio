@@ -36,6 +36,21 @@ footer[id] {
   background-clip: text;
 }
 
+/* ---- Hero black-hole background: slow cinematic zoom loop ---- */
+.hero-bg-drift {
+  animation: hero-drift 36s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes hero-drift {
+  from {
+    transform: scale(1) translate(0, 0);
+  }
+  to {
+    transform: scale(1.12) translate(-1.5%, 1%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
