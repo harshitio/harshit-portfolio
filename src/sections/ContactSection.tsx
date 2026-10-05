@@ -3,7 +3,7 @@ import { CONTACT_EMAIL, GITHUB_URL, X_URL, LINKEDIN_URL, INSTAGRAM_URL, GMAIL_CO
 
 const LINKS = [
   { label: 'Email', href: GMAIL_COMPOSE_URL, display: CONTACT_EMAIL },
-  { label: 'X / Twitter', href: X_URL, display: '@Harshit_io' },
+  { label: 'X / Twitter', href: X_URL, display: '@Harshit_io777' },
   { label: 'GitHub', href: GITHUB_URL, display: 'harshitio' },
   { label: 'LinkedIn', href: LINKEDIN_URL, display: 'harshit-io' },
   { label: 'Instagram', href: INSTAGRAM_URL, display: '@harshit.dev1' },

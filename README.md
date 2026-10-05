@@ -23,4 +23,4 @@ Live on GitHub Pages: https://harshitio.github.io
 - Email: braincore189@gmail.com
 - GitHub: https://github.com/harshitio
 - LinkedIn: https://www.linkedin.com/in/harshit-io-43661b42b/
-- X: https://x.com/Harshit_io
+- X: https://x.com/Harshit_io777

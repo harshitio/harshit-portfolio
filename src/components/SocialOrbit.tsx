@@ -14,7 +14,7 @@ const img = (file: string, alt: string) => (
 );
 
 const items: Item[] = [
-  { name: 'X', href: 'https://x.com/Harshit_io', logo: img('x.ico', 'X'), ring: 'inner', angle: 0 },
+  { name: 'X', href: 'https://x.com/Harshit_io777', logo: img('x.ico', 'X'), ring: 'inner', angle: 0 },
   { name: 'GitHub', href: 'https://github.com/harshitio', logo: img('github.ico', 'GitHub'), ring: 'inner', angle: 120 },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/harshit-io-43661b42b/', logo: img('linkedin.ico', 'LinkedIn'), ring: 'inner', angle: 240 },
   { name: 'Instagram', href: 'https://instagram.com/harshit.dev1', logo: img('instagram.ico', 'Instagram'), ring: 'mid', angle: 90 },
