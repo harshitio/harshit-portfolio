@@ -68,7 +68,7 @@ function ScrollRow({
           alt=""
           loading="lazy"
           decoding="async"
-          className="rounded-2xl object-cover"
+          className="marquee-image rounded-2xl object-cover"
           style={{ width: 420, height: 270 }}
         />
       ))}

@@ -32,7 +32,7 @@ export default function HeroSection() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative flex h-screen flex-col overflow-x-clip bg-black text-white">
+    <section className="hero-section relative flex h-screen flex-col overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <video
           className="h-full w-full object-cover"
@@ -55,7 +55,7 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      <div className="relative z-30 px-6 md:px-10 pt-6 md:pt-8">
+      <div className="hero-header relative z-30 px-6 md:px-10 pt-6 md:pt-8">
         <nav className="flex justify-between items-center">
           <FadeIn delay={0} y={-20}>
             <a
@@ -73,7 +73,7 @@ export default function HeroSection() {
           <FadeIn
             delay={0}
             y={-20}
-            className="max-[480px]:hidden flex gap-4 sm:gap-6 md:gap-10"
+            className="max-[640px]:hidden flex gap-4 sm:gap-6 md:gap-10"
           >
             {['About', 'Projects', 'Now', 'Contact'].map((link) => (
               <a
@@ -89,15 +89,22 @@ export default function HeroSection() {
             href={X_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="max-[480px]:inline-block hidden border-2 border-white rounded-full px-5 py-2 text-sm font-medium uppercase tracking-wider"
+            className="max-[640px]:inline-block hidden border-2 border-white rounded-full px-5 py-2 text-sm font-medium uppercase tracking-wider"
           >
             Follow
           </a>
         </nav>
+        <div className="hero-mobile-nav hidden" aria-label="Mobile navigation">
+          {['About', 'Projects', 'Now', 'Contact'].map((link) => (
+            <a key={link} href={`#${link.toLowerCase()}`}>
+              {link}
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* Magic FX: breathing glow + counter-rotating spell rings over the hole */}
-      <div className="pointer-events-none absolute left-[40%] top-[53%] z-[5]" aria-hidden="true">
+      <div className="hero-spell-effects pointer-events-none absolute left-[40%] top-[53%] z-[5]" aria-hidden="true">
         <div className="relative h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2">
           <div className="spell-glow absolute inset-[18%] rounded-full" />
           <div className="spell-ring-a absolute inset-0 rounded-full" />
@@ -124,8 +131,8 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <div className="relative flex-1">
-        <h1 className="absolute left-6 md:left-10 top-[16%] lg:top-1/2 lg:-translate-y-1/2 z-10 pointer-events-none font-black uppercase tracking-tight leading-[0.95] text-white text-[clamp(3rem,12vw,7.5rem)] lg:text-[clamp(3.5rem,8vw,7.5rem)]">
+      <div className="hero-title-wrap relative flex-1">
+        <h1 className="hero-title absolute left-6 md:left-10 top-[16%] lg:top-1/2 lg:-translate-y-1/2 z-10 pointer-events-none font-black uppercase tracking-tight leading-[0.95] text-white text-[clamp(3rem,12vw,7.5rem)] lg:text-[clamp(3.5rem,8vw,7.5rem)]">
           {H1_A.map((ch, i) => (
             <motion.span
               key={`a-${i}`}
@@ -166,15 +173,15 @@ export default function HeroSection() {
         </h1>
       </div>
 
-      <div className="relative z-30 flex items-end justify-between px-6 md:px-10 pb-7 sm:pb-8 md:pb-10">
-        <FadeIn delay={0.35} y={20}>
-          <p className="text-white font-light uppercase tracking-wide leading-snug text-[clamp(0.75rem,1.4vw,1.5rem)] max-w-[160px] sm:max-w-[220px] md:max-w-[320px]">
+      <div className="hero-bottom relative z-30 flex items-end justify-between px-6 md:px-10 pb-7 sm:pb-8 md:pb-10">
+        <FadeIn delay={0.35} y={20} className="hero-description-wrap">
+          <p className="hero-description text-white font-light uppercase tracking-wide leading-snug text-[clamp(0.75rem,1.4vw,1.5rem)] max-w-[160px] sm:max-w-[220px] md:max-w-[320px]">
             I build useful products with AI and software — agents,
             automation systems, and experiments from idea to working product.
           </p>
         </FadeIn>
-        <FadeIn delay={0.5} y={20}>
-          <div className="flex gap-3">
+        <FadeIn delay={0.5} y={20} className="hero-actions-wrap">
+          <div className="hero-actions flex gap-3">
             <a
               href="#projects"
               className="inline-block rounded-full px-6 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-medium uppercase tracking-widest border-2 border-white text-white transition-colors duration-200 hover:bg-white hover:text-black"

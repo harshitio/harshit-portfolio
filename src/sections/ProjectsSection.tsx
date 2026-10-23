@@ -445,7 +445,7 @@ function ProjectDetail({ project, index }: { project: Project; index: number }) 
     'inline-flex items-center gap-2 rounded-full border border-[#D7E2EA]/60 px-6 py-3 text-sm font-medium uppercase tracking-widest text-[#D7E2EA] transition-colors duration-200 hover:bg-[#D7E2EA] hover:text-[#0C0C0C]';
 
   return (
-    <div className="relative py-20 sm:py-28 md:py-36 border-b border-[#D7E2EA]/10">
+    <div className="project-detail relative py-20 sm:py-28 md:py-36 border-b border-[#D7E2EA]/10">
       <div
         aria-hidden="true"
         className="pointer-events-none select-none absolute -top-6 sm:-top-10 right-0 font-black text-[#D7E2EA]/[0.06] leading-none text-[clamp(8rem,24vw,320px)]"
