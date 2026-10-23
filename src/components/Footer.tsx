@@ -1,4 +1,5 @@
 import { GITHUB_URL, X_URL, LINKEDIN_URL, INSTAGRAM_URL, GMAIL_COMPOSE_URL } from '../lib/constants';
+import SafeImage from './SafeImage';
 
 export default function Footer() {
   return (
@@ -6,9 +7,10 @@ export default function Footer() {
       <div className="mx-auto max-w-[1100px] w-full px-5 py-16 sm:py-20">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-10 mb-14">
           <div className="flex items-center gap-5">
-            <img
+            <SafeImage
               src="/harshit-profile.jpeg"
               alt="Harshit"
+              fallbackSrc="/og-image.jpg"
               className="w-14 h-14 rounded-full object-cover border border-[#D7E2EA]/20"
             />
             <div>
