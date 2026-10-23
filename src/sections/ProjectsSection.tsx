@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LiveProjectButton from '../components/LiveProjectButton';
+import SafeImage from '../components/SafeImage';
+
+const MotionSafeImage = motion.create(SafeImage);
 
 interface ProjectImage {
   src: string;
@@ -321,7 +324,7 @@ function ImageLightbox({
       role="dialog"
       aria-modal="true"
     >
-      <motion.img
+      <MotionSafeImage
         key={images[index]!.src}
         src={images[index]!.src}
         alt={images[index]!.caption}
@@ -389,7 +392,7 @@ function ProjectCard({ project, index, onOpen }: { project: Project; index: numb
       aria-label={`View ${project.name} — ${project.tagline}`}
     >
       <div className="relative overflow-hidden aspect-[4/3]">
-        <img
+        <SafeImage
           src={project.images[0]!.src}
           alt={project.name}
           loading="lazy"
@@ -571,7 +574,7 @@ function ProjectDetail({ project, index }: { project: Project; index: number }) 
                   onClick={() => setLightboxIndex(0)}
                   className="group w-full block cursor-zoom-in"
                 >
-                  <img
+                  <SafeImage
                     src={project.images[0]!.src}
                     alt={project.images[0]!.caption}
                     className="w-full aspect-[4/3] object-cover object-top rounded-3xl border border-[#D7E2EA]/15 transition-[filter] duration-200 group-hover:brightness-110"
@@ -584,7 +587,7 @@ function ProjectDetail({ project, index }: { project: Project; index: number }) 
               </div>
               <div>
                 <button onClick={() => setLightboxIndex(1)} className="group w-full block cursor-zoom-in">
-                  <img
+                  <SafeImage
                     src={project.images[1]!.src}
                     alt={project.images[1]!.caption}
                     className="w-full aspect-[16/10] object-cover object-top rounded-3xl border border-[#D7E2EA]/15 transition-[filter] duration-200 group-hover:brightness-110"
@@ -595,7 +598,7 @@ function ProjectDetail({ project, index }: { project: Project; index: number }) 
               </div>
               <div>
                 <button onClick={() => setLightboxIndex(2)} className="group w-full block cursor-zoom-in">
-                  <img
+                  <SafeImage
                     src={project.images[2]!.src}
                     alt={project.images[2]!.caption}
                     className="w-full aspect-[16/10] object-cover object-top rounded-3xl border border-[#D7E2EA]/15 transition-[filter] duration-200 group-hover:brightness-110"

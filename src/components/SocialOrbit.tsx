@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import './SocialOrbit.css';
+import SafeImage from './SafeImage';
 
 type Item = {
   name: string;
@@ -10,7 +11,12 @@ type Item = {
 };
 
 const img = (file: string, alt: string) => (
-  <img src={`/socials/${file}`} alt={alt} className="orbit-logo" />
+  <SafeImage
+    src={`/socials/${file}`}
+    alt={alt}
+    className="orbit-logo"
+    fallbackSrc="/favicon.png"
+  />
 );
 
 const items: Item[] = [
@@ -37,9 +43,10 @@ export default function SocialOrbit() {
   return (
     <div className="social-orbit" aria-label="Navigation">
       <div className="orbit-center">
-        <img
+        <SafeImage
           src="/harshit-profile.jpeg"
           alt="Harshit"
+          fallbackSrc="/og-image.jpg"
         />
       </div>
 

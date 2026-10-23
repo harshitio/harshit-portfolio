@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import SafeImage from '../components/SafeImage';
 
 const IMAGES = [
   '/marquee/m01.webp',
@@ -41,18 +42,34 @@ function ScrollRow({
   const rowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => {
+    let frame = 0;
+
+    const updateTransform = () => {
+      frame = 0;
       const el = rowRef.current;
       if (!el) return;
+
       const rect = el.getBoundingClientRect();
       const sectionTop = rect.top + window.scrollY;
       const offset = (window.scrollY - sectionTop + window.innerHeight) * 0.3;
-      el.style.transform = `translateX(${direction === 1 ? offset - 200 : -(offset - 200)}px)`;
+      const x = direction === 1 ? offset - 200 : -(offset - 200);
+      el.style.transform = `translate3d(${x}px, 0, 0)`;
     };
 
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateTransform);
+    };
+
+    scheduleUpdate();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, [direction]);
 
   return (
@@ -62,12 +79,13 @@ function ScrollRow({
       style={{ willChange: 'transform', width: 'max-content' }}
     >
       {triple(images).map((src, i) => (
-        <img
+        <SafeImage
           key={i}
           src={src}
           alt=""
           loading="lazy"
           decoding="async"
+          fallbackSrc="/hero/blackhole.jpg"
           className="marquee-image rounded-2xl object-cover"
           style={{ width: 420, height: 270 }}
         />

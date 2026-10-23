@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import SafeImage from '../components/SafeImage';
 import FadeIn from '../components/FadeIn';
 import SocialOrbit from '../components/SocialOrbit';
 import { GITHUB_URL, X_URL } from '../lib/constants';
@@ -30,21 +32,49 @@ export default function HeroSection() {
   const orbitY = useTransform(scrollY, [0, 450], [0, -30]);
 
   const reduceMotion = useReducedMotion();
+  const [playHeroVideo, setPlayHeroVideo] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(min-width: 641px) and (prefers-reduced-motion: no-preference)').matches
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(
+      '(min-width: 641px) and (prefers-reduced-motion: no-preference)'
+    );
+    const updateVideoPreference = () => setPlayHeroVideo(media.matches);
+    updateVideoPreference();
+    media.addEventListener('change', updateVideoPreference);
+    return () => media.removeEventListener('change', updateVideoPreference);
+  }, []);
 
   return (
     <section className="hero-section relative flex h-screen flex-col overflow-x-clip bg-black text-white">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <video
-          className="h-full w-full object-cover"
-          src="/hero/blackhole.mp4"
-          poster="/hero/blackhole.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-        />
+        {playHeroVideo ? (
+          <video
+            className="h-full w-full object-cover"
+            src="/hero/blackhole.mp4"
+            poster="/hero/blackhole.jpg"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+          />
+        ) : (
+          <SafeImage
+            className="h-full w-full object-cover"
+            src="/hero/blackhole.jpg"
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            fallbackSrc="/og-image.jpg"
+          />
+        )}
       </div>
 
       <div className="pointer-events-none hidden lg:block absolute right-[2%] xl:right-[4%] top-1/2 -translate-y-1/2 z-30">
