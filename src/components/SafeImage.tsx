@@ -1,4 +1,4 @@
-import { useState, type ImgHTMLAttributes, type SyntheticEvent } from 'react';
+import { useEffect, useState, type ImgHTMLAttributes, type SyntheticEvent } from 'react';
 
 interface SafeImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string;
@@ -8,8 +8,7 @@ interface SafeImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'
 
 /**
  * Keep image failures from becoming broken-image icons in the UI.
- * A new src automatically gets a fresh chance because failures are tracked
- * against the original src, not against the component instance.
+ * Reset failure state when either URL changes so each new source gets a fair try.
  */
 export default function SafeImage({
   src,
@@ -18,6 +17,11 @@ export default function SafeImage({
   ...props
 }: SafeImageProps) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFailedSrc(null);
+  }, [src, fallbackSrc]);
+
   const resolvedSrc = failedSrc === src ? fallbackSrc : src;
 
   const handleError = (event: SyntheticEvent<HTMLImageElement, Event>) => {
