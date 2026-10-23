@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - portfolio-quality-image-fixes
   pull_request:
     branches:
       - main
@@ -30,3 +29,26 @@ jobs:
 
       - name: Type-check and build
         run: npm run build
+
+  publish:
+    name: Trigger production publish
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch publish event to the live-site repository
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PORTFOLIO_PUBLISH_TOKEN }}
+        run: |
+          if [ -z "$PUBLISH_TOKEN" ]; then
+            echo "::notice::PORTFOLIO_PUBLISH_TOKEN is not configured; the live-site repository's scheduled sync remains the fallback."
+            exit 0
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url https://api.github.com/repos/harshitio/harshitio.github.io/dispatches \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $PUBLISH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data '{"event_type":"portfolio_source_updated"}'
