@@ -49,8 +49,13 @@ function ScrollRow({
       const el = rowRef.current;
       if (!el) return;
 
-      const rect = el.getBoundingClientRect();
-      const sectionTop = rect.top + window.scrollY;
+      // Measure the untransformed section, not the row itself. Reading the
+      // transformed row's rect here feeds the previous translateX back into
+      // the next scroll calculation and causes cumulative drift.
+      const section = el.parentElement;
+      const sectionTop = section
+        ? section.getBoundingClientRect().top + window.scrollY
+        : window.scrollY;
       const offset = (window.scrollY - sectionTop + window.innerHeight) * 0.3;
       const x = direction === 1 ? offset - 200 : -(offset - 200);
       el.style.transform = `translate3d(${x}px, 0, 0)`;
