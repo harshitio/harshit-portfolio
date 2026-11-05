@@ -1,0 +1,226 @@
+{
+  "files_scanned": 27,
+  "files_changed": 25,
+  "occurrences_replaced": 69,
+  "changes": [
+    {
+      "file": "public/projects/ai-agent/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/ai-agent/col2-image.webp",
+      "occurrences": 1,
+      "tokens": [
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/chatbot-hub/col1-image1.webp",
+      "occurrences": 7,
+      "tokens": [
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/chatbot-hub/col1-image2.webp",
+      "occurrences": 4,
+      "tokens": [
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/chatbot-hub/col2-image.webp",
+      "occurrences": 7,
+      "tokens": [
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/doc-pipeline/col1-image1.webp",
+      "occurrences": 4,
+      "tokens": [
+        "VELCORA",
+        "VELCORA",
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/doc-pipeline/col1-image2.webp",
+      "occurrences": 3,
+      "tokens": [
+        "VELCORA",
+        "VELCORA",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/doc-pipeline/col2-image.webp",
+      "occurrences": 3,
+      "tokens": [
+        "VELCORA",
+        "Velcora",
+        "VELCORA"
+      ]
+    },
+    {
+      "file": "public/projects/high-fidelity/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/high-fidelity/col1-image2.webp",
+      "occurrences": 2,
+      "tokens": [
+        "Velcora",
+        "\"Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/lead-engine/col1-image1.webp",
+      "occurrences": 5,
+      "tokens": [
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/lead-engine/col1-image2.webp",
+      "occurrences": 2,
+      "tokens": [
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/lead-engine/col2-image.webp",
+      "occurrences": 2,
+      "tokens": [
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/lead-pipeline/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "velcora"
+      ]
+    },
+    {
+      "file": "public/projects/lead-pipeline/col1-image2.webp",
+      "occurrences": 1,
+      "tokens": [
+        "velcora"
+      ]
+    },
+    {
+      "file": "public/projects/lead-pipeline/col2-image.webp",
+      "occurrences": 2,
+      "tokens": [
+        "velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/quote-generator/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/quote-generator/col1-image2.webp",
+      "occurrences": 3,
+      "tokens": [
+        "Velcora",
+        "Velcora",
+        "hello@velcora.ai"
+      ]
+    },
+    {
+      "file": "public/projects/quote-generator/col2-image.webp",
+      "occurrences": 3,
+      "tokens": [
+        "Velcora",
+        "Velcora",
+        "hello@velcora.ai"
+      ]
+    },
+    {
+      "file": "public/projects/salon-os/col1-image1.webp",
+      "occurrences": 2,
+      "tokens": [
+        "Velcora",
+        "VELCORA"
+      ]
+    },
+    {
+      "file": "public/projects/salon-os/col1-image2.webp",
+      "occurrences": 2,
+      "tokens": [
+        "VELCORA",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/salon-os/col2-image.webp",
+      "occurrences": 2,
+      "tokens": [
+        "VELCORA",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/sdr-pipeline/col1-image1.webp",
+      "occurrences": 2,
+      "tokens": [
+        "Velcora",
+        "Velcora"
+      ]
+    },
+    {
+      "file": "public/projects/sdr-pipeline/col1-image2.webp",
+      "occurrences": 4,
+      "tokens": [
+        "velcora-ai-h",
+        "VelcoraS",
+        "Velcora",
+        "VelcoraAl\u2014"
+      ]
+    },
+    {
+      "file": "public/projects/sdr-pipeline/col2-image.webp",
+      "occurrences": 4,
+      "tokens": [
+        "velcora-ai-h",
+        "Velcora",
+        "Velcora",
+        "VelcoraAl\u2014"
+      ]
+    }
+  ]
+}
