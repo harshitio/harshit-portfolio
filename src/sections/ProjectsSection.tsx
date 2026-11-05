@@ -1,5 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import LiveProjectButton from '../components/LiveProjectButton';
+import SafeImage from '../components/SafeImage';
+
+const MotionSafeImage = motion.create(SafeImage);
+
+interface ProjectImage {
+  src: string;
+  caption: string;
+}
 
 interface Project {
   number: string;
@@ -11,8 +20,11 @@ interface Project {
   result: string;
   built: string[];
   stack: string[];
+  images: ProjectImage[];
   status: 'live' | 'prototype' | 'archived' | 'experimental';
   lesson: string;
+  repo?: string;
+  live?: string;
 }
 
 const PROJECTS: Project[] = [
@@ -35,8 +47,15 @@ const PROJECTS: Project[] = [
       'Local-first quote store, live tax/total recalculation.',
     ],
     stack: ['Vite', 'React 19', 'TypeScript', 'Tailwind v4', 'shadcn/ui', 'Gemini API'],
+    images: [
+      { src: '/projects/quote-generator/col2-image.webp', caption: 'Branded, print-ready quote sheet with live recalculation' },
+      { src: '/projects/quote-generator/col1-image1.webp', caption: 'Start from a saved layout or a blank sheet' },
+      { src: '/projects/quote-generator/col1-image2.webp', caption: 'AI drafts the full quote from a one-line brief' },
+    ],
     status: 'live',
     lesson: 'The useful part was not the AI — it was the editable output. People trust what they can tweak.',
+    repo: 'https://github.com/harshitio/velcora-quote-generator-P1',
+    live: 'https://velcora-quote-generator-p1.vercel.app',
   },
   {
     number: '02',
@@ -57,8 +76,15 @@ const PROJECTS: Project[] = [
       'Vercel-ready with SPA rewrite, engines pinned, build + typecheck + lint passing.',
     ],
     stack: ['Vite', 'React 18', 'TypeScript', 'Tailwind 3', 'Supabase'],
+    images: [
+      { src: '/projects/lead-pipeline/col2-image.webp', caption: 'Intake form — auto-scored, hot / warm / cold' },
+      { src: '/projects/lead-pipeline/col1-image1.webp', caption: 'Overview — every lead and stage at a glance' },
+      { src: '/projects/lead-pipeline/col1-image2.webp', caption: 'Kanban pipeline — new → qualified → won' },
+    ],
     status: 'live',
     lesson: 'Auto-scoring changes behavior. When leads have a number attached, people actually follow up.',
+    repo: 'https://github.com/harshitio/velcora-single-tenant-lead-pipeline-crm-p5',
+    live: 'https://velcora-single-tenant-lead-pipeline.vercel.app',
   },
   {
     number: '03',
@@ -79,8 +105,15 @@ const PROJECTS: Project[] = [
       'Automation & API hub: rule-based triggers, live webhook log, SDK surface.',
     ],
     stack: ['TypeScript', 'Vite', 'React', 'Multimodal OCR'],
+    images: [
+      { src: '/projects/doc-pipeline/col1-image1.webp', caption: 'Document Workbench — ingest, paste, or generate test invoices' },
+      { src: '/projects/doc-pipeline/col1-image2.webp', caption: 'Structured Inspector — parsed fields with math + risk validation' },
+      { src: '/projects/doc-pipeline/col2-image.webp', caption: 'Automation & API — workflow rules, webhook log, SDK' },
+    ],
     status: 'prototype',
     lesson: 'Validation is more valuable than extraction. Finding the wrong number matters more than reading the right one.',
+    repo: 'https://github.com/harshitio/velcora-enterprise--doc---P6',
+    live: 'https://velcora-enterprise-doc-p6.vercel.app',
   },
   {
     number: '04',
@@ -101,6 +134,11 @@ const PROJECTS: Project[] = [
       'AI automations — SMS / WhatsApp client retention bot, no-show alerts, and an AI Copilot layer.',
     ],
     stack: ['TypeScript', 'Vite', 'React', 'Tailwind', 'AI Automations'],
+    images: [
+      { src: '/projects/salon-os/col1-image1.webp', caption: 'Overview — chairs booked, stock alerts, daily gross' },
+      { src: '/projects/salon-os/col1-image2.webp', caption: 'Appointments — chair scheduling matrix + client booking' },
+      { src: '/projects/salon-os/col2-image.webp', caption: 'Inventory — color bar with barcode tracking and auto-deduct' },
+    ],
     status: 'prototype',
     lesson: 'Vertical SaaS works when you understand the daily workflow. The value is in the small details that save real minutes.',
   },
@@ -123,8 +161,15 @@ const PROJECTS: Project[] = [
       'Session auth, chat history persistence, multi-model switcher across leading LLMs.',
     ],
     stack: ['Next.js 16', 'AI SDK', 'TypeScript', 'Drizzle'],
+    images: [
+      { src: '/projects/ai-agent/col1-image1.webp', caption: 'Onboarding — five workflow modes with starter prompts' },
+      { src: '/projects/ai-agent/col1-image2.webp', caption: 'Chat thread — prompt runs through the co-pilot' },
+      { src: '/projects/ai-agent/col2-image.webp', caption: 'Model switcher — run the agent on your choice of LLM' },
+    ],
     status: 'prototype',
     lesson: 'The useful part of an agent is not just the model — it is the workflow, state, and checks around it.',
+    repo: 'https://github.com/harshitio/velcora-ai-agent-P7',
+    live: 'https://velcora-ai-agent-p6.vercel.app',
   },
   {
     number: '06',
@@ -145,8 +190,15 @@ const PROJECTS: Project[] = [
       'Architecture view (4-tier ingest → embed → retrieve → generate), ROI calculator, security matrix.',
     ],
     stack: ['Vite', 'React 19', 'TypeScript', 'Tailwind v4', 'Gemini', 'Express'],
+    images: [
+      { src: '/projects/chatbot-hub/col1-image1.webp', caption: 'Autonomy platform with Live Studio, Vector Hub, ROI, Pricing' },
+      { src: '/projects/chatbot-hub/col1-image2.webp', caption: 'AI Playground — sourced answers with confidence score + citations' },
+      { src: '/projects/chatbot-hub/col2-image.webp', caption: 'Knowledge Base — ingest documents, get sourced answers' },
+    ],
     status: 'prototype',
     lesson: 'Confidence scoring changes trust. When users see a score, they trust the answer more than when they don\'t.',
+    repo: 'https://github.com/harshitio/velcora-ai-knowledge-chatbot-hub-P10',
+    live: 'https://velcora-ai-knowledge-chatbot-hub-p1.vercel.app',
   },
   {
     number: '07',
@@ -167,6 +219,11 @@ const PROJECTS: Project[] = [
       'Focus Station: Pomodoro timer with task queues and procedural ambient soundscapes.',
     ],
     stack: ['Vite', 'React 19', 'TypeScript', 'Tailwind', 'Gemini', 'Express'],
+    images: [
+      { src: '/projects/high-fidelity/col1-image1.webp', caption: 'Clarity in an endlessly noisy universe' },
+      { src: '/projects/high-fidelity/col1-image2.webp', caption: 'Scraper Studio — preset targets + JSON / grid / cURL outputs' },
+      { src: '/projects/high-fidelity/col2-image.webp', caption: 'Automation + Focus — pipelines, cron, Pomodoro, ambient sound' },
+    ],
     status: 'prototype',
     lesson: 'The scraper is the hook, but the automation pipeline is the product. Extraction without workflow is just a demo.',
   },
@@ -189,8 +246,14 @@ const PROJECTS: Project[] = [
       'Google Sheets sink with per-query background execution.',
     ],
     stack: ['n8n', 'Web Scraping', 'Google Sheets', 'Regex', 'Automation'],
+    images: [
+      { src: '/projects/lead-engine/col1-image1.webp', caption: 'The full 26-node engine — query runner, extractor, dedupe, sheet sink' },
+      { src: '/projects/lead-engine/col1-image2.webp', caption: 'Map-index search — matching business listings from each query' },
+      { src: '/projects/lead-engine/col2-image.webp', caption: 'Email extraction — regex parser pulling clean emails' },
+    ],
     status: 'live',
     lesson: 'The best automation is invisible. This runs on cron and nobody thinks about it — that\'s the point.',
+    repo: 'https://github.com/harshitio/velcora-lead-gen-system-P3',
   },
   {
     number: '09',
@@ -211,48 +274,108 @@ const PROJECTS: Project[] = [
       'Concierge and No-Show Agents: calendar-triggered status flips and automatic reschedule outreach.',
     ],
     stack: ['n8n', 'Google Sheets', 'Gmail', 'Google Calendar', 'LLM', 'Automation'],
+    images: [
+      { src: '/projects/sdr-pipeline/col1-image1.webp', caption: 'The full 36-node pipeline — CRM, follow-up, concierge, no-show' },
+      { src: '/projects/sdr-pipeline/col1-image2.webp', caption: 'Follow-up engine — three-touch LLM-personalized sequences' },
+      { src: '/projects/sdr-pipeline/col2-image.webp', caption: 'CRM + calendar automation — bookings pulled out instantly' },
+    ],
     status: 'live',
     lesson: 'Agents work best when each one does one thing well. The pipeline is just four specialists connected by data.',
+    repo: 'https://github.com/harshitio/velcora-lead-gen-system-P3',
   },
 ];
 
-function ProjectPreview({ project, compact = false }: { project: Project; compact?: boolean }) {
+function ImageLightbox({
+  images,
+  index,
+  onIndex,
+  onClose,
+}: {
+  images: ProjectImage[];
+  index: number;
+  onIndex: (i: number) => void;
+  onClose: () => void;
+}) {
+  const onKey = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') onIndex((index + 1) % images.length);
+      if (e.key === 'ArrowLeft') onIndex((index - 1 + images.length) % images.length);
+    },
+    [index, images.length, onClose, onIndex]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onKey]);
+
+  if (index < 0 || index >= images.length) return null;
+
   return (
-    <div
-      className={`project-preview relative isolate overflow-hidden rounded-2xl border border-[#D7E2EA]/15 bg-[#101820] text-white ${compact ? 'h-full min-h-[220px]' : 'w-full aspect-[4/3]'}`}
-      aria-label={`${project.name} project preview by Harshit`}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 sm:p-8"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_18%,rgba(95,145,176,0.28),transparent_42%),radial-gradient(ellipse_at_15%_88%,rgba(69,88,114,0.22),transparent_48%)]" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.13]"
-        style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.18) 1px, transparent 1px)', backgroundSize: '34px 34px' }}
+      <MotionSafeImage
+        key={images[index]!.src}
+        src={images[index]!.src}
+        alt={images[index]!.caption}
+        initial={{ scale: 0.92, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.94, opacity: 0 }}
+        transition={{ type: 'spring', duration: 0.45, bounce: 0.16 }}
+        className="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl ring-1 ring-white/10 select-none"
+        draggable={false}
       />
-      <div className="relative z-10 flex h-full min-h-[220px] flex-col justify-between p-5 sm:p-7">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-sm font-black">H</span>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em]">Harshit</p>
-              <p className="text-[9px] uppercase tracking-[0.18em] text-white/45">Project {project.number}</p>
-            </div>
+      <p className="absolute bottom-16 sm:bottom-20 left-1/2 -translate-x-1/2 text-center text-white/70 text-sm max-w-md px-4">
+        {images[index]!.caption}
+      </p>
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors text-xl leading-none"
+      >
+        ✕
+      </button>
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={() => onIndex((index - 1 + images.length) % images.length)}
+            aria-label="Previous"
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors text-2xl leading-none"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => onIndex((index + 1) % images.length)}
+            aria-label="Next"
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors text-2xl leading-none"
+          >
+            ›
+          </button>
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => onIndex(i)}
+                aria-label={`Screenshot ${i + 1}`}
+                className={`h-2 rounded-full transition-all ${
+                  i === index ? 'w-6 bg-white' : 'w-2 bg-white/30 hover:bg-white/60'
+                }`}
+              />
+            ))}
           </div>
-          <span className="rounded-full border border-white/15 bg-black/20 px-3 py-1 text-[9px] uppercase tracking-[0.16em] text-white/60">{project.status}</span>
-        </div>
-        <div className="max-w-[88%]">
-          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.24em] text-[#AFC6D7]/70">{project.category}</p>
-          <h4 className={`font-black uppercase leading-[0.95] tracking-tight ${compact ? 'text-[clamp(1.4rem,3.4vw,2.5rem)]' : 'text-[clamp(1.8rem,4vw,3.4rem)]'}`}>{project.name}</h4>
-          {!compact && <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60">{project.tagline}</p>}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {project.stack.slice(0, 3).map((tech) => (
-            <span key={tech} className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[9px] tracking-wide text-white/65">{tech}</span>
-          ))}
-          <span className="ml-auto text-[9px] tracking-[0.2em] text-white/35">HARSHIT.IO</span>
-        </div>
-      </div>
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -right-10 h-56 w-56 rounded-full border border-white/10" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-12 -right-2 h-36 w-36 rounded-full border border-white/10" />
-    </div>
+        </>
+      )}
+    </motion.div>
   );
 }
 
@@ -269,7 +392,12 @@ function ProjectCard({ project, index, onOpen }: { project: Project; index: numb
       aria-label={`View ${project.name} — ${project.tagline}`}
     >
       <div className="relative overflow-hidden aspect-[4/3]">
-        <ProjectPreview project={project} compact />
+        <SafeImage
+          src={project.images[0]!.src}
+          alt={project.name}
+          loading="lazy"
+          className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+        />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-4 right-2 font-black text-white/[0.10] leading-none text-[clamp(4rem,9vw,7rem)]"
@@ -313,7 +441,11 @@ function ProjectCard({ project, index, onOpen }: { project: Project; index: numb
 }
 
 function ProjectDetail({ project, index }: { project: Project; index: number }) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const flipped = index % 2 === 1;
+
+  const Btn =
+    'inline-flex items-center gap-2 rounded-full border border-[#D7E2EA]/60 px-6 py-3 text-sm font-medium uppercase tracking-widest text-[#D7E2EA] transition-colors duration-200 hover:bg-[#D7E2EA] hover:text-[#0C0C0C]';
 
   return (
     <div className="project-detail relative py-20 sm:py-28 md:py-36 border-b border-[#D7E2EA]/10">
@@ -401,15 +533,95 @@ function ProjectDetail({ project, index }: { project: Project; index: number }) 
               </div>
             </div>
 
-
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              {project.repo && (
+                <a
+                  href={project.repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={Btn}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                    <path d="M9 18c-4.51 2-5-2-7-2" />
+                  </svg>
+                  Source Code
+                </a>
+              )}
+              {project.live && (
+                <a
+                  href={project.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={Btn}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Live Demo
+                </a>
+              )}
+              {project.live && <LiveProjectButton href={project.live} />}
+            </div>
           </div>
 
           <div className="min-w-0">
-            <ProjectPreview project={project} />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <button
+                  onClick={() => setLightboxIndex(0)}
+                  className="group w-full block cursor-zoom-in"
+                >
+                  <SafeImage
+                    src={project.images[0]!.src}
+                    alt={project.images[0]!.caption}
+                    className="w-full aspect-[4/3] object-cover object-top rounded-3xl border border-[#D7E2EA]/15 transition-[filter] duration-200 group-hover:brightness-110"
+                    loading="lazy"
+                  />
+                </button>
+                <p className="text-xs text-[#D7E2EA]/50 mt-2 text-right">
+                  {project.images[0]!.caption}
+                </p>
+              </div>
+              <div>
+                <button onClick={() => setLightboxIndex(1)} className="group w-full block cursor-zoom-in">
+                  <SafeImage
+                    src={project.images[1]!.src}
+                    alt={project.images[1]!.caption}
+                    className="w-full aspect-[16/10] object-cover object-top rounded-3xl border border-[#D7E2EA]/15 transition-[filter] duration-200 group-hover:brightness-110"
+                    loading="lazy"
+                  />
+                </button>
+                <p className="text-xs text-[#D7E2EA]/50 mt-2">{project.images[1]!.caption}</p>
+              </div>
+              <div>
+                <button onClick={() => setLightboxIndex(2)} className="group w-full block cursor-zoom-in">
+                  <SafeImage
+                    src={project.images[2]!.src}
+                    alt={project.images[2]!.caption}
+                    className="w-full aspect-[16/10] object-cover object-top rounded-3xl border border-[#D7E2EA]/15 transition-[filter] duration-200 group-hover:brightness-110"
+                    loading="lazy"
+                  />
+                </button>
+                <p className="text-xs text-[#D7E2EA]/50 mt-2">{project.images[2]!.caption}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <ImageLightbox
+            images={project.images}
+            index={lightboxIndex}
+            onIndex={setLightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
