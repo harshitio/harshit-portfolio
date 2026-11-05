@@ -136,7 +136,7 @@ def replace_one(canvas: Image.Image, original: np.ndarray, box: tuple[int, int, 
 
     draw = ImageDraw.Draw(canvas)
     replacement = replacement_for(raw)
-    colour = foreground_colour(original, box)
+    colour = foreground_colour(original, box)[::-1]
     font = pick_font(raw, height, canvas)
     max_width = max(8, (x2 - x1) + pad_x)
     max_height = max(8, (y2 - y1) + pad_y * 2)
@@ -166,10 +166,10 @@ def main() -> None:
         if not tokens:
             continue
         original_rgb = np.array(image)
-        original_bgr = cv2.cvtColor(original_rgb, cv2.COLOR_RGB2BGR)
         canvas = image.copy()
         for box, raw, confidence in sorted(tokens, key=lambda t: (t[0][1], t[0][0])):
-            replace_one(canvas, original_bgr, box, raw)
+            current_bgr = cv2.cvtColor(np.array(canvas), cv2.COLOR_RGB2BGR)
+            replace_one(canvas, current_bgr, box, raw)
         canvas.save(path, "WEBP", quality=96, method=6)
         report["files_changed"] += 1
         report["occurrences_replaced"] += len(tokens)
