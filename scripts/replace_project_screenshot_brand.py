@@ -171,7 +171,7 @@ def main() -> None:
             image = Image.open(path).convert("RGB")
         except Exception as exc:
             raise RuntimeError(f"Could not open {path}: {exc}") from exc
-        relative_path = path.relative(ROOT).as_posix()
+        relative_path = path.relative_to(ROOT).as_posix()
         tokens = find_tokens(image, expanded=relative_path in EXPANDED_OCR_FILES)
         if not tokens:
             continue
