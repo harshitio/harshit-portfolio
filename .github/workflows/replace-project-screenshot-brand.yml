@@ -16,8 +16,8 @@ jobs:
       - name: Check out the pull request branch
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.event.pull_request.head.ref }}
-          token: \${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install OCR and image tools
         run: |
@@ -36,7 +36,7 @@ jobs:
 
       - name: Save screenshot changes to the pull request branch
         env:
-          BRANCH_NAME: \${{ github.event.pull_request.head.ref }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
