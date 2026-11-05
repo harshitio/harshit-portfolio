@@ -164,7 +164,7 @@ def replace_one(canvas: Image.Image, original: np.ndarray, box: tuple[int, int, 
 
 MANUAL_REPLACEMENTS = [
     # Low-resolution SDR workflow panel text that standard OCR missed.
-    ("public/projects/sdr-pipeline/col1-image1.webp", (449, 207, 476, 216), FONT_BOLD, 6, 449, 207, (247, 244, 255)),
+    ("public/projects/sdr-pipeline/col1-image1.webp", (449, 207, 476, 216), FONT_BOLD, 6, 449, 207, (247, 244, 255), True, 0.90),
     ("public/projects/sdr-pipeline/col1-image1.webp", (585, 221, 604, 229), FONT_REGULAR, 5, 585, 221, (245, 241, 255)),
     ("public/projects/sdr-pipeline/col1-image1.webp", (470, 610, 488, 618), FONT_REGULAR, 5, 470, 610, (245, 241, 255)),
     ("public/projects/sdr-pipeline/col2-image.webp", (298, 198, 323, 209), FONT_REGULAR, 5, 298, 198, (245, 241, 255)),
@@ -173,7 +173,8 @@ MANUAL_REPLACEMENTS = [
 
 def apply_manual_replacement(path: Path, box: tuple[int, int, int, int], font_path: str,
                              font_size: int, tx: int, ty: int,
-                             colour: tuple[int, int, int]) -> bool:
+                             colour: tuple[int, int, int], force: bool = False,
+                             horizontal_scale: float = 1.0) -> bool:
     image = Image.open(path).convert("RGB")
     x1, y1, x2, y2 = box
     # Make this safe to rerun: don't paint over a word already changed to Harshit.
@@ -181,7 +182,7 @@ def apply_manual_replacement(path: Path, box: tuple[int, int, int, int], font_pa
                         min(image.width, x2 + 2), min(image.height, y2 + 2)))
     check = check.resize((check.width * 8, check.height * 8), Image.Resampling.LANCZOS)
     recognized = normalize(pytesseract.image_to_string(check, config="--oem 3 --psm 7"))
-    if "harshit" in recognized:
+    if not force and "harshit" in recognized:
         return False
 
     original = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
@@ -192,10 +193,19 @@ def apply_manual_replacement(path: Path, box: tuple[int, int, int, int], font_pa
 
     # Supersampling keeps the very small replacement text legible and antialiased.
     scale = 4
-    layer = Image.new("RGBA", (image.width * scale, image.height * scale), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(layer)
     font = ImageFont.truetype(font_path, font_size * scale)
-    draw.text((tx * scale, ty * scale), "Harshit", font=font, fill=(*colour, 255))
+    text_layer = Image.new("RGBA", (180 * scale, 24 * scale), (0, 0, 0, 0))
+    text_draw = ImageDraw.Draw(text_layer)
+    text_draw.text((0, 0), "Harshit", font=font, fill=(*colour, 255))
+    text_bounds = text_layer.getbbox()
+    text_layer = text_layer.crop(text_bounds)
+    if horizontal_scale != 1.0:
+        text_layer = text_layer.resize(
+            (max(1, round(text_layer.width * horizontal_scale)), text_layer.height),
+            Image.Resampling.LANCZOS,
+        )
+    layer = Image.new("RGBA", (image.width * scale, image.height * scale), (0, 0, 0, 0))
+    layer.alpha_composite(text_layer, (tx * scale + text_bounds[0], ty * scale + text_bounds[1]))
     layer = layer.resize(image.size, Image.Resampling.LANCZOS)
     canvas = Image.alpha_composite(canvas.convert("RGBA"), layer).convert("RGB")
     canvas.save(path, "WEBP", quality=98, method=6)
@@ -231,9 +241,13 @@ def main() -> None:
 
     # Apply the small set of visually confirmed fallbacks that OCR cannot reliably read.
     manual_changes = []
-    for relative, box, font_path, font_size, tx, ty, colour in MANUAL_REPLACEMENTS:
+    for spec in MANUAL_REPLACEMENTS:
+        relative, box, font_path, font_size, tx, ty, colour = spec[:7]
+        force = spec[7] if len(spec) > 7 else False
+        horizontal_scale = spec[8] if len(spec) > 8 else 1.0
         path = ROOT / relative
-        if apply_manual_replacement(path, box, font_path, font_size, tx, ty, colour):
+        if apply_manual_replacement(path, box, font_path, font_size, tx, ty, colour,
+                                    force=force, horizontal_scale=horizontal_scale):
             manual_changes.append(relative)
     for relative in manual_changes:
         report["occurrences_replaced"] += 1
@@ -259,7 +273,8 @@ def main() -> None:
         if remaining:
             leftovers.append({"file": relative_path, "tokens": [raw for _, raw, _ in remaining]})
     # Also re-read every exact manual region at high resolution.
-    for relative, box, *_ in MANUAL_REPLACEMENTS:
+    for spec in MANUAL_REPLACEMENTS:
+        relative, box = spec[0], spec[1]
         path = ROOT / relative
         image = Image.open(path).convert("RGB")
         x1, y1, x2, y2 = box
