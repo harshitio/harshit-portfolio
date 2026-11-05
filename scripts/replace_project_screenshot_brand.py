@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE_ROOTS = [ROOT / "public" / "projects"]
 REPORT_PATH = ROOT / "brand-replacement-report.json"
-PSMS = (11,)
+PSMS = (11, 6)
 SCALE = 1
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
@@ -36,18 +36,17 @@ def is_brand_token(value: str) -> bool:
 
 
 def replacement_for(value: str) -> str:
-    clean = re.sub(r"[^A-Za-z]", "", value)
-    lower = clean.lower()
-    suffix = ""
-    if lower.startswith("velcora") and len(clean) > 7:
-        suffix = clean[7:]
-    if clean.isupper():
-        replacement = "HARSHIT"
-    elif clean.islower():
-        replacement = "harshit"
-    else:
-        replacement = "Harshit"
-    return replacement + suffix
+    def preserve_case(match: re.Match[str]) -> str:
+        token = match.group(0)
+        if token.isupper():
+            return "HARSHIT"
+        if token.islower():
+            return "harshit"
+        return "Harshit"
+
+    # Replace only the brand substring. Keep email prefixes, domains, punctuation,
+    # and adjoining labels intact (for example hello@velcora.ai -> hello@harshit.ai).
+    return re.sub(r"velcora", preserve_case, value, flags=re.IGNORECASE)
 
 
 def overlap(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> float:
