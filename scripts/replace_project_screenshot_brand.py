@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 IMAGE_ROOTS = [ROOT / "public" / "projects"]
 REPORT_PATH = ROOT / "brand-replacement-report.json"
 PSMS = (11,)
-SCALE = 2
+SCALE = 1
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_SERIF = "/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf"
@@ -186,7 +186,8 @@ def main() -> None:
 
     # Verify the modified files with a second OCR pass.
     leftovers = []
-    for path in files:
+    changed_paths = [ROOT / entry["file"] for entry in report["changes"]]
+    for path in changed_paths:
         image = Image.open(path).convert("RGB")
         remaining = find_tokens(image)
         if remaining:
