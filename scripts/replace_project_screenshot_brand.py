@@ -20,8 +20,17 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE_ROOTS = [ROOT / "public" / "projects"]
 REPORT_PATH = ROOT / "brand-replacement-report.json"
-PSMS = (11, 6, 3)
-SCALE = 3
+PSMS = (11, 6, 3, 12, 4)
+SCALE = 2
+EXPANDED_OCR_FILES = {
+    "public/projects/chatbot-hub/col1-image1.webp",
+    "public/projects/doc-pipeline/col1-image2.webp",
+    "public/projects/doc-pipeline/col2-image.webp",
+    "public/projects/lead-pipeline/col2-image.webp",
+    "public/projects/sdr-pipeline/col1-image1.webp",
+    "public/projects/sdr-pipeline/col1-image2.webp",
+    "public/projects/sdr-pipeline/col2-image.webp",
+}
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_SERIF = "/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf"
@@ -36,18 +45,17 @@ def is_brand_token(value: str) -> bool:
 
 
 def replacement_for(value: str) -> str:
-    clean = re.sub(r"[^A-Za-z]", "", value)
-    lower = clean.lower()
-    suffix = ""
-    if lower.startswith("velcora") and len(clean) > 7:
-        suffix = clean[7:]
-    if clean.isupper():
-        replacement = "HARSHIT"
-    elif clean.islower():
-        replacement = "harshit"
-    else:
-        replacement = "Harshit"
-    return replacement + suffix
+    def preserve_case(match: re.Match[str]) -> str:
+        token = match.group(0)
+        if token.isupper():
+            return "HARSHIT"
+        if token.islower():
+            return "harshit"
+        return "Harshit"
+
+    # Replace only the brand substring. Keep email prefixes, domains, punctuation,
+    # and adjoining labels intact (for example hello@velcora.ai -> hello@harshit.ai).
+    return re.sub(r"velcora", preserve_case, value, flags=re.IGNORECASE)
 
 
 def overlap(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> float:
@@ -60,11 +68,12 @@ def overlap(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> float
     return inter / min(area_a, area_b)
 
 
-def find_tokens(image: Image.Image) -> list[tuple[tuple[int, int, int, int], str, float]]:
-    enlarged = image.resize((image.width * SCALE, image.height * SCALE), Image.Resampling.LANCZOS)
+def find_tokens(image: Image.Image, expanded: bool = False) -> list[tuple[tuple[int, int, int, int], str, float]]:
+    scale = SCALE if expanded else 1
+    enlarged = image.resize((image.width * scale, image.height * scale), Image.Resampling.LANCZOS)
     rgb = np.array(enlarged)
     found: list[tuple[tuple[int, int, int, int], str, float]] = []
-    for psm in PSMS:
+    for psm in (PSMS if expanded else (11, 6)):
         data = pytesseract.image_to_data(
             rgb,
             config=f"--oem 3 --psm {psm}",
@@ -77,12 +86,12 @@ def find_tokens(image: Image.Image) -> list[tuple[tuple[int, int, int, int], str
                 confidence = float(data["conf"][i])
             except (ValueError, TypeError):
                 confidence = 0
-            if confidence < 18:
+            if confidence < 8:
                 continue
-            x = int(data["left"][i] / SCALE)
-            y = int(data["top"][i] / SCALE)
-            w = int(data["width"][i] / SCALE)
-            h = int(data["height"][i] / SCALE)
+            x = int(data["left"][i] / scale)
+            y = int(data["top"][i] / scale)
+            w = int(data["width"][i] / scale)
+            h = int(data["height"][i] / scale)
             if w < 2 or h < 2:
                 continue
             box = (max(0, x), max(0, y), min(image.width, x + w), min(image.height, y + h))
@@ -153,6 +162,56 @@ def replace_one(canvas: Image.Image, original: np.ndarray, box: tuple[int, int, 
     draw.text((int(tx), int(ty)), replacement, font=font, fill=colour)
 
 
+MANUAL_REPLACEMENTS = [
+    # Low-resolution SDR workflow panel text that standard OCR missed.
+    ("public/projects/sdr-pipeline/col1-image1.webp", (449, 207, 476, 216), FONT_BOLD, 6, 449, 207, (247, 244, 255), True, 0.90),
+    ("public/projects/sdr-pipeline/col1-image1.webp", (585, 221, 604, 229), FONT_REGULAR, 5, 585, 221, (245, 241, 255)),
+    ("public/projects/sdr-pipeline/col1-image1.webp", (470, 610, 488, 618), FONT_REGULAR, 5, 470, 610, (245, 241, 255)),
+    ("public/projects/sdr-pipeline/col2-image.webp", (298, 198, 323, 209), FONT_REGULAR, 5, 298, 198, (245, 241, 255)),
+]
+
+
+def apply_manual_replacement(path: Path, box: tuple[int, int, int, int], font_path: str,
+                             font_size: int, tx: int, ty: int,
+                             colour: tuple[int, int, int], force: bool = False,
+                             horizontal_scale: float = 1.0) -> bool:
+    image = Image.open(path).convert("RGB")
+    x1, y1, x2, y2 = box
+    # Make this safe to rerun: don't paint over a word already changed to Harshit.
+    check = image.crop((max(0, x1 - 2), max(0, y1 - 2),
+                        min(image.width, x2 + 2), min(image.height, y2 + 2)))
+    check = check.resize((check.width * 8, check.height * 8), Image.Resampling.LANCZOS)
+    recognized = normalize(pytesseract.image_to_string(check, config="--oem 3 --psm 7"))
+    if not force and "harshit" in recognized:
+        return False
+
+    original = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    mask = np.zeros(original.shape[:2], dtype=np.uint8)
+    cv2.rectangle(mask, (x1, y1), (x2, y2), 255, thickness=-1)
+    repaired = cv2.inpaint(original, mask, 3, cv2.INPAINT_TELEA)
+    canvas = Image.fromarray(cv2.cvtColor(repaired, cv2.COLOR_BGR2RGB))
+
+    # Supersampling keeps the very small replacement text legible and antialiased.
+    scale = 4
+    font = ImageFont.truetype(font_path, font_size * scale)
+    text_layer = Image.new("RGBA", (180 * scale, 24 * scale), (0, 0, 0, 0))
+    text_draw = ImageDraw.Draw(text_layer)
+    text_draw.text((0, 0), "Harshit", font=font, fill=(*colour, 255))
+    text_bounds = text_layer.getbbox()
+    text_layer = text_layer.crop(text_bounds)
+    if horizontal_scale != 1.0:
+        text_layer = text_layer.resize(
+            (max(1, round(text_layer.width * horizontal_scale)), text_layer.height),
+            Image.Resampling.LANCZOS,
+        )
+    layer = Image.new("RGBA", (image.width * scale, image.height * scale), (0, 0, 0, 0))
+    layer.alpha_composite(text_layer, (tx * scale + text_bounds[0], ty * scale + text_bounds[1]))
+    layer = layer.resize(image.size, Image.Resampling.LANCZOS)
+    canvas = Image.alpha_composite(canvas.convert("RGBA"), layer).convert("RGB")
+    canvas.save(path, "WEBP", quality=98, method=6)
+    return True
+
+
 def main() -> None:
     report = {"files_scanned": 0, "files_changed": 0, "occurrences_replaced": 0, "changes": []}
     files = sorted(p for root in IMAGE_ROOTS for p in root.rglob("*.webp"))
@@ -162,7 +221,8 @@ def main() -> None:
             image = Image.open(path).convert("RGB")
         except Exception as exc:
             raise RuntimeError(f"Could not open {path}: {exc}") from exc
-        tokens = find_tokens(image)
+        relative_path = path.relative_to(ROOT).as_posix()
+        tokens = find_tokens(image, expanded=relative_path in EXPANDED_OCR_FILES)
         if not tokens:
             continue
         original_rgb = np.array(image)
@@ -179,6 +239,25 @@ def main() -> None:
             "tokens": [raw for _, raw, _ in tokens],
         })
 
+    # Apply the small set of visually confirmed fallbacks that OCR cannot reliably read.
+    manual_changes = []
+    for spec in MANUAL_REPLACEMENTS:
+        relative, box, font_path, font_size, tx, ty, colour = spec[:7]
+        force = spec[7] if len(spec) > 7 else False
+        horizontal_scale = spec[8] if len(spec) > 8 else 1.0
+        path = ROOT / relative
+        if apply_manual_replacement(path, box, font_path, font_size, tx, ty, colour,
+                                    force=force, horizontal_scale=horizontal_scale):
+            manual_changes.append(relative)
+    for relative in manual_changes:
+        report["occurrences_replaced"] += 1
+        report["changes"].append({
+            "file": relative,
+            "occurrences": 1,
+            "tokens": ["manual visual match: Velcora -> Harshit"],
+        })
+    report["files_changed"] = len({entry["file"] for entry in report["changes"]})
+
     REPORT_PATH.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
     if report["occurrences_replaced"] == 0:
@@ -186,11 +265,25 @@ def main() -> None:
 
     # Verify the modified files with a second OCR pass.
     leftovers = []
-    for path in files:
+    changed_paths = [ROOT / entry["file"] for entry in report["changes"]]
+    for path in changed_paths:
         image = Image.open(path).convert("RGB")
-        remaining = find_tokens(image)
+        relative_path = path.relative_to(ROOT).as_posix()
+        remaining = find_tokens(image, expanded=relative_path in EXPANDED_OCR_FILES)
         if remaining:
-            leftovers.append({"file": str(path.relative_to(ROOT)), "tokens": [raw for _, raw, _ in remaining]})
+            leftovers.append({"file": relative_path, "tokens": [raw for _, raw, _ in remaining]})
+    # Also re-read every exact manual region at high resolution.
+    for spec in MANUAL_REPLACEMENTS:
+        relative, box = spec[0], spec[1]
+        path = ROOT / relative
+        image = Image.open(path).convert("RGB")
+        x1, y1, x2, y2 = box
+        crop = image.crop((max(0, x1 - 2), max(0, y1 - 2),
+                           min(image.width, x2 + 2), min(image.height, y2 + 2)))
+        crop = crop.resize((crop.width * 8, crop.height * 8), Image.Resampling.LANCZOS)
+        recognized = normalize(pytesseract.image_to_string(crop, config="--oem 3 --psm 7"))
+        if "velcora" in recognized:
+            leftovers.append({"file": relative, "manual_region_text": recognized})
     if leftovers:
         print(json.dumps({"verification_leftovers": leftovers}, indent=2))
         raise SystemExit("Some old-brand text remains; review the screenshots before merging.")

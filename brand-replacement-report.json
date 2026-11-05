@@ -1,0 +1,35 @@
+{
+  "files_scanned": 27,
+  "files_changed": 2,
+  "occurrences_replaced": 4,
+  "changes": [
+    {
+      "file": "public/projects/sdr-pipeline/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "manual visual match: Velcora -> Harshit"
+      ]
+    },
+    {
+      "file": "public/projects/sdr-pipeline/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "manual visual match: Velcora -> Harshit"
+      ]
+    },
+    {
+      "file": "public/projects/sdr-pipeline/col1-image1.webp",
+      "occurrences": 1,
+      "tokens": [
+        "manual visual match: Velcora -> Harshit"
+      ]
+    },
+    {
+      "file": "public/projects/sdr-pipeline/col2-image.webp",
+      "occurrences": 1,
+      "tokens": [
+        "manual visual match: Velcora -> Harshit"
+      ]
+    }
+  ]
+}
