@@ -20,8 +20,8 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE_ROOTS = [ROOT / "public" / "projects"]
 REPORT_PATH = ROOT / "brand-replacement-report.json"
-PSMS = (11, 6, 3)
-SCALE = 1
+PSMS = (11, 6, 3, 12, 4)
+SCALE = 2
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_SERIF = "/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf"
@@ -76,7 +76,7 @@ def find_tokens(image: Image.Image) -> list[tuple[tuple[int, int, int, int], str
                 confidence = float(data["conf"][i])
             except (ValueError, TypeError):
                 confidence = 0
-            if confidence < 18:
+            if confidence < 8:
                 continue
             x = int(data["left"][i] / SCALE)
             y = int(data["top"][i] / SCALE)
