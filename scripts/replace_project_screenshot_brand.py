@@ -22,6 +22,15 @@ IMAGE_ROOTS = [ROOT / "public" / "projects"]
 REPORT_PATH = ROOT / "brand-replacement-report.json"
 PSMS = (11, 6, 3, 12, 4)
 SCALE = 2
+EXPANDED_OCR_FILES = {
+    "public/projects/chatbot-hub/col1-image1.webp",
+    "public/projects/doc-pipeline/col1-image2.webp",
+    "public/projects/doc-pipeline/col2-image.webp",
+    "public/projects/lead-pipeline/col2-image.webp",
+    "public/projects/sdr-pipeline/col1-image1.webp",
+    "public/projects/sdr-pipeline/col1-image2.webp",
+    "public/projects/sdr-pipeline/col2-image.webp",
+}
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_SERIF = "/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf"
@@ -59,11 +68,12 @@ def overlap(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> float
     return inter / min(area_a, area_b)
 
 
-def find_tokens(image: Image.Image) -> list[tuple[tuple[int, int, int, int], str, float]]:
-    enlarged = image.resize((image.width * SCALE, image.height * SCALE), Image.Resampling.LANCZOS)
+def find_tokens(image: Image.Image, expanded: bool = False) -> list[tuple[tuple[int, int, int, int], str, float]]:
+    scale = SCALE if expanded else 1
+    enlarged = image.resize((image.width * scale, image.height * scale), Image.Resampling.LANCZOS)
     rgb = np.array(enlarged)
     found: list[tuple[tuple[int, int, int, int], str, float]] = []
-    for psm in PSMS:
+    for psm in (PSMS if expanded else (11, 6)):
         data = pytesseract.image_to_data(
             rgb,
             config=f"--oem 3 --psm {psm}",
@@ -78,10 +88,10 @@ def find_tokens(image: Image.Image) -> list[tuple[tuple[int, int, int, int], str
                 confidence = 0
             if confidence < 8:
                 continue
-            x = int(data["left"][i] / SCALE)
-            y = int(data["top"][i] / SCALE)
-            w = int(data["width"][i] / SCALE)
-            h = int(data["height"][i] / SCALE)
+            x = int(data["left"][i] / scale)
+            y = int(data["top"][i] / scale)
+            w = int(data["width"][i] / scale)
+            h = int(data["height"][i] / scale)
             if w < 2 or h < 2:
                 continue
             box = (max(0, x), max(0, y), min(image.width, x + w), min(image.height, y + h))
@@ -161,7 +171,8 @@ def main() -> None:
             image = Image.open(path).convert("RGB")
         except Exception as exc:
             raise RuntimeError(f"Could not open {path}: {exc}") from exc
-        tokens = find_tokens(image)
+        relative_path = path.relative(ROOT).as_posix()
+        tokens = find_tokens(image, expanded=relative_path in EXPANDED_OCR_FILES)
         if not tokens:
             continue
         original_rgb = np.array(image)
