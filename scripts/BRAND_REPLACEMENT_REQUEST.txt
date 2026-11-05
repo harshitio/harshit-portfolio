@@ -1,0 +1,1 @@
+Temporary trigger for the screenshot brand replacement workflow. The workflow keeps every original screenshot and link, replacing only detected visible occurrences of the former brand with Harshit.
