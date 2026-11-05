@@ -162,6 +162,46 @@ def replace_one(canvas: Image.Image, original: np.ndarray, box: tuple[int, int, 
     draw.text((int(tx), int(ty)), replacement, font=font, fill=colour)
 
 
+MANUAL_REPLACEMENTS = [
+    # Low-resolution SDR workflow panel text that standard OCR missed.
+    ("public/projects/sdr-pipeline/col1-image1.webp", (449, 207, 476, 216), FONT_BOLD, 6, 449, 207, (247, 244, 255)),
+    ("public/projects/sdr-pipeline/col1-image1.webp", (585, 221, 604, 229), FONT_REGULAR, 5, 585, 221, (245, 241, 255)),
+    ("public/projects/sdr-pipeline/col1-image1.webp", (470, 610, 488, 618), FONT_REGULAR, 5, 470, 610, (245, 241, 255)),
+    ("public/projects/sdr-pipeline/col2-image.webp", (298, 198, 323, 209), FONT_REGULAR, 5, 298, 198, (245, 241, 255)),
+]
+
+
+def apply_manual_replacement(path: Path, box: tuple[int, int, int, int], font_path: str,
+                             font_size: int, tx: int, ty: int,
+                             colour: tuple[int, int, int]) -> bool:
+    image = Image.open(path).convert("RGB")
+    x1, y1, x2, y2 = box
+    # Make this safe to rerun: don't paint over a word already changed to Harshit.
+    check = image.crop((max(0, x1 - 2), max(0, y1 - 2),
+                        min(image.width, x2 + 2), min(image.height, y2 + 2)))
+    check = check.resize((check.width * 8, check.height * 8), Image.Resampling.LANCZOS)
+    recognized = normalize(pytesseract.image_to_string(check, config="--oem 3 --psm 7"))
+    if "harshit" in recognized:
+        return False
+
+    original = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    mask = np.zeros(original.shape[:2], dtype=np.uint8)
+    cv2.rectangle(mask, (x1, y1), (x2, y2), 255, thickness=-1)
+    repaired = cv2.inpaint(original, mask, 3, cv2.INPAINT_TELEA)
+    canvas = Image.fromarray(cv2.cvtColor(repaired, cv2.COLOR_BGR2RGB))
+
+    # Supersampling keeps the very small replacement text legible and antialiased.
+    scale = 4
+    layer = Image.new("RGBA", (image.width * scale, image.height * scale), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    font = ImageFont.truetype(font_path, font_size * scale)
+    draw.text((tx * scale, ty * scale), "Harshit", font=font, fill=(*colour, 255))
+    layer = layer.resize(image.size, Image.Resampling.LANCZOS)
+    canvas = Image.alpha_composite(canvas.convert("RGBA"), layer).convert("RGB")
+    canvas.save(path, "WEBP", quality=98, method=6)
+    return True
+
+
 def main() -> None:
     report = {"files_scanned": 0, "files_changed": 0, "occurrences_replaced": 0, "changes": []}
     files = sorted(p for root in IMAGE_ROOTS for p in root.rglob("*.webp"))
@@ -189,6 +229,21 @@ def main() -> None:
             "tokens": [raw for _, raw, _ in tokens],
         })
 
+    # Apply the small set of visually confirmed fallbacks that OCR cannot reliably read.
+    manual_changes = []
+    for relative, box, font_path, font_size, tx, ty, colour in MANUAL_REPLACEMENTS:
+        path = ROOT / relative
+        if apply_manual_replacement(path, box, font_path, font_size, tx, ty, colour):
+            manual_changes.append(relative)
+    for relative in manual_changes:
+        report["occurrences_replaced"] += 1
+        report["changes"].append({
+            "file": relative,
+            "occurrences": 1,
+            "tokens": ["manual visual match: Velcora -> Harshit"],
+        })
+    report["files_changed"] = len({entry["file"] for entry in report["changes"]})
+
     REPORT_PATH.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
     if report["occurrences_replaced"] == 0:
@@ -199,9 +254,21 @@ def main() -> None:
     changed_paths = [ROOT / entry["file"] for entry in report["changes"]]
     for path in changed_paths:
         image = Image.open(path).convert("RGB")
-        remaining = find_tokens(image)
+        relative_path = path.relative_to(ROOT).as_posix()
+        remaining = find_tokens(image, expanded=relative_path in EXPANDED_OCR_FILES)
         if remaining:
-            leftovers.append({"file": str(path.relative_to(ROOT)), "tokens": [raw for _, raw, _ in remaining]})
+            leftovers.append({"file": relative_path, "tokens": [raw for _, raw, _ in remaining]})
+    # Also re-read every exact manual region at high resolution.
+    for relative, box, *_ in MANUAL_REPLACEMENTS:
+        path = ROOT / relative
+        image = Image.open(path).convert("RGB")
+        x1, y1, x2, y2 = box
+        crop = image.crop((max(0, x1 - 2), max(0, y1 - 2),
+                           min(image.width, x2 + 2), min(image.height, y2 + 2)))
+        crop = crop.resize((crop.width * 8, crop.height * 8), Image.Resampling.LANCZOS)
+        recognized = normalize(pytesseract.image_to_string(crop, config="--oem 3 --psm 7"))
+        if "velcora" in recognized:
+            leftovers.append({"file": relative, "manual_region_text": recognized})
     if leftovers:
         print(json.dumps({"verification_leftovers": leftovers}, indent=2))
         raise SystemExit("Some old-brand text remains; review the screenshots before merging.")
